@@ -9,3 +9,4 @@ project('project-4', ['cpp', 'c'],
 executable('gendata', 'gendata.cpp', install: true)
 executable('gengraph', 'gengraph.cpp', install: true)
 executable('task-1', 'task-1.cpp', install: true)
+executable('task-2', 'task-2.cpp', install: true)
