@@ -45,12 +45,13 @@ dfs(Graph const &graph, VertexID src, VertexID dst)
 	std::vector<VertexID> parent(size, SIZE_MAX);
 	std::vector<Cost> cost(size, INT_MAX);
 	std::stack<VertexID> branches;
-	std::size_t pops = 0, pushes = 1, hops, length;
+	std::size_t pops = 0, pushes = 0, hops, length;
 	VertexID cur;
 
 	auto start_time = std::chrono::steady_clock::now();
 	cost[src] = 0;
 	branches.push(src);
+	++pushes;
 	while (!branches.empty()) {
 		cur = branches.top();
 		branches.pop();
@@ -70,13 +71,118 @@ dfs(Graph const &graph, VertexID src, VertexID dst)
 	}
 	auto end_time = std::chrono::steady_clock::now();
 	std::chrono::duration<double> duration = end_time - start_time;
-	hops = 0; length = 0;
+	hops = 0; length = cost[dst];
 	cur = dst;
 	while (cur != src) {
 		++hops;
-		length += cost[cur];
+		std::cout << cur << " ";
 		cur = parent[cur];
+
 	}
+	std::cout << src << std::endl;
+	std::cout << "Number of hops: " << hops << std::endl;
+	std::cout << "Path length:    " << length << std::endl;
+	std::cout << "Pushes:         " << pushes << std::endl;
+	std::cout << "Pops:           " << pops << std::endl;
+	std::cout << "Time taken:     " << duration.count() << std::endl;
+}
+
+void
+bfs(Graph const &graph, VertexID src, VertexID dst)
+{
+	std::size_t size = graph.size();
+	std::vector<VertexID> parent(size, SIZE_MAX);
+	std::vector<Cost> cost(size, INT_MAX);
+	std::queue<VertexID> branches;
+	std::size_t pops = 0, pushes = 0, hops, length;
+	VertexID cur;
+
+	auto start_time = std::chrono::steady_clock::now();
+	cost[src] = 0;
+	branches.push(src);
+	++pushes;
+	while (!branches.empty()) {
+		cur = branches.front();
+		branches.pop();
+		++pops;
+		if (cur != dst) {
+			for (auto edge : graph[cur]) {
+				if ((cost[edge.first] >
+				     (cost[cur] + edge.second)) &&
+				    ((cost[cur] + edge.second) < cost[dst])) {
+					cost[edge.first] = cost[cur] + edge.second;
+					parent[edge.first] = cur;
+					branches.push(edge.first);
+					++pushes;
+				}
+			}
+		}
+	}
+	auto end_time = std::chrono::steady_clock::now();
+	std::chrono::duration<double> duration = end_time - start_time;
+	hops = 0; length = cost[dst];
+	cur = dst;
+	while (cur != src) {
+		++hops;
+		std::cout << cur << " ";
+		cur = parent[cur];
+
+	}
+	std::cout << src << std::endl;
+	std::cout << "Number of hops: " << hops << std::endl;
+	std::cout << "Path length:    " << length << std::endl;
+	std::cout << "Pushes:         " << pushes << std::endl;
+	std::cout << "Pops:           " << pops << std::endl;
+	std::cout << "Time taken:     " << duration.count() << std::endl;
+}
+
+struct EdgeCompare {
+	bool operator()(Edge const &a, Edge const &b) const {
+		return a.second > b.second;
+	}
+};
+
+void
+ucs(Graph const &graph, VertexID src, VertexID dst)
+{
+	std::size_t size = graph.size();
+	std::vector<VertexID> parent(size, SIZE_MAX);
+	std::vector<Cost> cost(size, INT_MAX);
+	std::priority_queue<Edge, std::vector<Edge>, EdgeCompare> branches;
+	std::size_t pops = 0, pushes = 0, hops, length;
+	Edge cur;
+
+	auto start_time = std::chrono::steady_clock::now();
+	cost[src] = 0;
+	branches.push(std::make_pair(src, 0));
+	++pushes;
+	while (!branches.empty()) {
+		cur = branches.top();
+		branches.pop();
+		++pops;
+		if (cur.first != dst) {
+			for (auto edge : graph[cur.first]) {
+				if ((cost[edge.first] >
+				     (cost[cur.first] + edge.second)) &&
+				    ((cost[cur.first] + edge.second) < cost[dst])) {
+					cost[edge.first] = cost[cur.first] + edge.second;
+					parent[edge.first] = cur.first;
+					branches.push(edge);
+					++pushes;
+				}
+			}
+		}
+	}
+	auto end_time = std::chrono::steady_clock::now();
+	std::chrono::duration<double> duration = end_time - start_time;
+	hops = 0; length = cost[dst];
+	while (dst != src) {
+		++hops;
+		std::cout << dst << " ";
+		dst = parent[dst];
+
+	}
+	std::cout << src << std::endl;
 	std::cout << "Number of hops: " << hops << std::endl;
 	std::cout << "Path length:    " << length << std::endl;
 	std::cout << "Pushes:         " << pushes << std::endl;
@@ -110,7 +216,9 @@ main(int argc, char *argv[])
 			if (command == "dfs") {
 				dfs(graph, src, dst);
 			} else if (command == "bfs") {
+				bfs(graph, src, dst);
 			} else if (command == "ucs") {
+				ucs(graph, src, dst);
 			} else if (command == "exit") {
 				break;
 			} else {

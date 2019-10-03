@@ -78,7 +78,7 @@ subject_map(std::string const &subject)
 }
 
 Students
-build_table(char const filename[])
+build_table(char const *filename)
 {
 	std::string student_name;
 	std::string subject;
