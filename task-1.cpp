@@ -35,9 +35,8 @@
  * would be more complicated, and require extra memory.
  *
  * I also considered pre-computing the total grade for each student and
- * storing it in the map, but chose not to. Computing it on-the-fly
- * is very fast but storing it costs an extra O(n) space, even if we
- * never use it.
+ * storing it in the map, but chose not to. Storing it costs an extra O(n)
+ * space, even if we never use it, and it is easily and quickly derivable.
  */
 
 
